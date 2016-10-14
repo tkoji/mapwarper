@@ -25,10 +25,10 @@ gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0',          group: :doc
 
 # Use ActiveModel has_secure_password
-# gem 'bcrypt', '~> 3.1.7'
+gem 'bcrypt', '~> 3.1.7'
 
 # Use unicorn as the app server
-# gem 'unicorn'
+gem 'unicorn'
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]
@@ -52,7 +52,7 @@ gem 'will_paginate', '~> 3.0'
 gem 'spawnling', '~>2.1'
 
 #Rails 4 support for the audited (acts_as_audited gem) is not quite rails4 worthy - see #https://github.com/collectiveidea/audited/pull/166
-gem 'audited-activerecord', github: 'timwaters/audited', branch: 'rails4'  
+gem 'audited-activerecord', github: 'timwaters/audited', branch: 'rails4'
 
 gem 'gdal'
 gem 'georuby'
