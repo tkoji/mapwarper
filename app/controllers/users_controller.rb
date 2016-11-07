@@ -1,12 +1,12 @@
 class UsersController < ApplicationController
   layout 'application'
-  
+
   before_filter :authenticate_user!, :only => [:show, :edit, :update]
 
   before_filter :check_super_user_role, :only => [:index, :destroy, :enable, :disable, :stats, :disable_and_reset, :force_confirm]
 
   rescue_from ActiveRecord::RecordNotFound, :with => :bad_record
-  
+
   helper :sort
   include SortHelper
 
@@ -122,7 +122,7 @@ class UsersController < ApplicationController
       generated_password = Devise.friendly_token.first(8)
       @user.password=generated_password
       @user.password_confirmation=generated_password
-      
+
       if @user.save
         UserMailer.disabled_change_password(@user).deliver_now
         @user.send_reset_password_instructions
@@ -130,11 +130,11 @@ class UsersController < ApplicationController
       else
         flash[:error] = "Sorry, there was a problem changingin this user"
       end
-      
+
     else
       flash[:error] = "Admins cannot be disabled and reset, sorry"
     end
-    
+
     redirect_to :action => 'show'
   end
 
@@ -157,12 +157,12 @@ class UsersController < ApplicationController
     end
     redirect_to :action => 'index'
   end
-  
+
   def force_confirm
     @user = User.find(params[:id])
     if !@user.confirmed?
       @user.force_confirm!
-      if @user.confirmed? 
+      if @user.confirmed?
         flash[:notice] = "User confirmed"
       else
         flash[:error] = "There was a problem confirming this user."
@@ -172,8 +172,8 @@ class UsersController < ApplicationController
     end
     redirect_to :action => 'index'
   end
-  
-  
+
+
 
   def bad_record
     respond_to do | format |
