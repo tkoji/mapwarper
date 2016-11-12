@@ -43,5 +43,8 @@ db/maptileindex/*
 #public assets
 public/assets/**
 
+#test files
+test/test_files/*
+
 # unicorn settings
 config/unicorn.rb
