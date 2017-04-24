@@ -1,1 +1,1 @@
-I18n.default_locale = :ja
+I18n.default_locale = :nl

@@ -1,3 +1,4 @@
+---
 nl:
   activerecord:
     attributes:
@@ -33,6 +34,8 @@ nl:
           filename_not_unique: is al in gebruik
         my_map:
           attributes:
+            map_id:
+              not_unique: Map has already been saved to the user.
             user_id:
               not_unique: Kaart is al opgeslagen
     models:
@@ -282,6 +285,9 @@ nl:
       not_saved:
         one: '1 fout verhinderde dat deze %{resource} kon worden opgeslagen:'
         other: "%{count} fouten verhinderden dat deze %{resource} kon worden opgeslagen:"
+      spoofed_media_type: may not be in the correct image format. Try again with a jpeg, png or gif.
+    template:
+      header: Header
   gcps:
     add:
       new_gcp_notice: Nieuw controlepunt toegevoegd.
@@ -440,8 +446,8 @@ nl:
       not_enough_maps_alert: Sorry, maar er moeten minstens twee kaarten geselecteerd zijn.
       wrong_align_alert: Sorry, alleen horizontale en verticale alignment zijn momenteel beschikbaar.
     clip:
-      confirm_delete_tool: Wilt u dit echt verwijderen?
       clip_popup_title: Uitsnijden...
+      confirm_delete_tool: Wilt u dit echt verwijderen?
       delete_tool_title: Verwijder een polygoon.
       draw_tool_title: Teken een nieuwe polygoon om het gebied dat u wilt behouden
       move_tool_title: Verplaats de kaart
@@ -814,10 +820,14 @@ nl:
       p1_method: 1st Order Polynomial (min 3 punten)
       p2_method: 2nd Order Polynomial (min 6 punten)
       p3_method: 3rd Order Polynomial (min 10 punten)
+      pan_lock: Pan/zoom lock
       panel_title: Controlepaneel
       rectifying_notice: Georefereren...
       resample_label: 'Methode:'
       server_error: Sorry, maar er lijkt zich een fout voor te doen bij het versturen van het verzoek naar de server. Opnieuw proberen?
+      shortcuts_html: '1,p: Switch to add point control <br /> 2,d: Switch to move control point control <br /> 3,m: Switch to move around map control <br /><br />q: Quickly add point over mouse position <br /> a: Quickly add point over mouse position and automatically adds a point on the opposite map <span class=''small-gray''>(needs at least 2 points already saved)</span> <br /> <br /> [enter],e: Save pairs of points'
+      shortcuts_link: Keyboard Shortcuts
+      shortcuts_title: Keyboard Shortcuts
       title: Georefereer kaart
       tps_method: Thin Plate Spline (veel punten, erg verspreid)
       unmasked_question_html: Deze kaart is nog niet uitgesneden. Wilt u <a href='%{href}'>een uitsnede toevoegen of wijzigen</a>?
@@ -988,6 +998,10 @@ nl:
       u_no: nee
       u_yes: ja
   will_paginate:
+    entry:
+      page_entries_info:
+        single_page_html:
+          zero: Nothing found
     layer:
       page_entries_info:
         multi_page: Toon %{model} %{from} - %{to} van %{count} in totaal

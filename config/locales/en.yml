@@ -1,3 +1,4 @@
+---
 en:
   activerecord:
     attributes:
@@ -33,9 +34,9 @@ en:
           filename_not_unique: is already being used
         my_map:
           attributes:
-            user_id:
-              not_unique: Map has already been saved to the user.
             map_id:
+              not_unique: Map has already been saved to the user.
+            user_id:
               not_unique: Map has already been saved to the user.
     models:
       import:
@@ -286,7 +287,9 @@ en:
       not_saved:
         one: '1 error prohibited this %{resource} from being saved:'
         other: "%{count} errors prohibited this %{resource} from being saved:"
-      spoofed_media_type: "may not be in the correct image format. Try again with a jpeg, png or gif."
+      spoofed_media_type: may not be in the correct image format. Try again with a jpeg, png or gif.
+    template:
+      header: Header
   gcps:
     add:
       new_gcp_notice: New control point added.
@@ -815,23 +818,23 @@ en:
       lanczos: Lanczos
       method_label: 'Rectify Method:'
       near: Nearest Neighbour, fastest (default)
-      no_mask: No
+      no_mask: false
       p1_method: 1st Order Polynomial (min 3 points)
       p2_method: 2nd Order Polynomial (min 6 points)
       p3_method: 3rd Order Polynomial (min 10 points)
-      pan_lock: "Pan/zoom lock"
+      pan_lock: Pan/zoom lock
       panel_title: Control Panel
       rectifying_notice: Rectifying.....
       resample_label: 'Resampling Method:'
-      shortcuts_link: Keyboard Shortcuts
-      shortcuts_html: "1,p: Switch to add point control <br /> 2,d: Switch to move control point control <br /> 3,m: Switch to move around map control <br /><br />q: Quickly add point over mouse position <br /> a: Quickly add point over mouse position and automatically adds a point on the opposite map <span class='small-gray'>(needs at least 2 points already saved)</span> <br /> <br /> [enter],e: Save pairs of points"
-      shortcuts_title: Keyboard Shortcuts
       server_error: Sorry, there appears to be an error sending the request to the server, try again?...
+      shortcuts_html: '1,p: Switch to add point control <br /> 2,d: Switch to move control point control <br /> 3,m: Switch to move around map control <br /><br />q: Quickly add point over mouse position <br /> a: Quickly add point over mouse position and automatically adds a point on the opposite map <span class=''small-gray''>(needs at least 2 points already saved)</span> <br /> <br /> [enter],e: Save pairs of points'
+      shortcuts_link: Keyboard Shortcuts
+      shortcuts_title: Keyboard Shortcuts
       title: 'Rectifying Map '
       tps_method: Thin Plate Spline (many points widely spread)
       unmasked_question_html: This map is not currently masked. Do you want to <a href='%{href}'>add or edit a mask now</a>?
       warp_button: Warp Image! &rarr;
-      yes_mask: Yes
+      yes_mask: true
     warp_aligned:
       no_destination: Sorry the destination map is not available to be aligned.
       success: Map aligned. You can now rectify it!
