@@ -22,6 +22,7 @@ module Rails4Mapwarper
     config.i18n.default_locale = :ja
     config.i18n.enforce_available_locales = true
     config.i18n.available_locales = [:en, :nl, :ja]
+    config.i18n.locale = :ja
 
     I18n.available_locales = %i(ja en)
     I18n.enforce_available_locales = true
