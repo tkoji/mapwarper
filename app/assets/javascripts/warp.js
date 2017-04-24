@@ -9,6 +9,8 @@ var to_vectors;
 var from_vectors;
 var active_to_vectors;
 var active_from_vectors;
+var transformation = new ol.transform.Helmert();
+var dialogOpen = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -98,8 +100,8 @@ function init() {
   active_style.graphicOpacity = 1;
   active_style.graphicWidth = 14;
   active_style.graphicHeight = 22;
-  active_style.graphicXOffset = -(active_style.graphicWidth / 2);
-  active_style.graphicYOffset = -active_style.graphicHeight;
+  active_style.graphicXOffset = -(active_style.graphicWidth / 2) - 2;
+  active_style.graphicYOffset = -active_style.graphicHeight - 2;
   active_style.externalGraphic = icon_imgPath + "AQUA.png";
 
   to_vectors = new OpenLayers.Layer.Vector("To vector markers");
@@ -116,26 +118,24 @@ function init() {
 
   to_map.addLayers([to_vectors, active_to_vectors]);
   from_map.addLayers([from_vectors, active_from_vectors]);
-  //fix for dragging bug
-  //  OpenLayers.Control.DragFeature.prototype.upFeature = function() {};
-  //fix
+
   var to_panel = new OpenLayers.Control.Panel(
           {displayClass: 'toPanel olControlEditingToolbar'}
   );
   var dragMarker = new OpenLayers.Control.DragFeature(to_vectors,
-          {displayClass: 'olControlDragFeature', title: 'Move Control Point'});
+          {displayClass: 'olControlDragFeature', title: I18n["warp"]["move_gcp"]});
   dragMarker.onComplete = function(feature) {
     saveDraggedMarker(feature);
   };
 
   var drawFeatureTo = new OpenLayers.Control.DrawFeature(active_to_vectors, OpenLayers.Handler.Point,
-          {displayClass: 'olControlDrawFeaturePoint', title: 'Add Control Point', handlerOptions: {style: active_style}});
+          {displayClass: 'olControlDrawFeaturePoint', title: I18n["warp"]["add_gcp"], handlerOptions: {style: active_style}});
   drawFeatureTo.featureAdded = function(feature) {
     newaddGCPto(feature);
   };
-
+  
   var drawFeatureFrom = new OpenLayers.Control.DrawFeature(active_from_vectors, OpenLayers.Handler.Point,
-          {displayClass: 'olControlDrawFeaturePoint', title: 'Add Control Point', handlerOptions: {style: active_style}});
+          {displayClass: 'olControlDrawFeaturePoint', title: I18n["warp"]["add_gcp"], handlerOptions: {style: active_style}});
   drawFeatureFrom.featureAdded = function(feature) {
     newaddGCPfrom(feature);
   };
@@ -144,7 +144,7 @@ function init() {
           {displayClass: 'olControlEditingToolbar'}
   );
   var dragMarkerFrom = new OpenLayers.Control.DragFeature(from_vectors,
-          {displayClass: 'olControlDragFeature', title: 'Move Control Point'});
+          {displayClass: 'olControlDragFeature', title: I18n["warp"]["move_gcp"]});
   dragMarkerFrom.onComplete = function(feature) {
     saveDraggedMarker(feature);
   };
@@ -154,26 +154,37 @@ function init() {
 
     var dialog = jQuery("#add_custom_layer").dialog({
       bgiframe: true,
-      height: 300,
+      height: 350,
       width: 500,
       resizable: false,
       draggable: false,
       modal: true,
       hide: 'slow',
-      title: 'Add Custom Basemap',
-      buttons: {
-        "Add Layer": function(){
-          var template = jQuery("#template").val();
-          addCustomLayer(template);
-          dialog.dialog("close"); 
-          form[ 0 ].reset();
+      title: I18n["warp"]["custom_layer_title"],
+      buttons: [{
+          text: I18n["warp"]["custom_layer_add_layer_button"],
+          click: function () {
+            var selected = jQuery('.layer-select').select2("data")[0];
+            if (selected.tiles) {
+              var layer = {"title": selected.title, "type": selected.type, "template": selected.tiles};
+              addCustomLayer(layer);
+            }
+            dialog.dialog("close");
+            form[ 0 ].reset();
+          }
         },
-        Cancel: function () {
-          form[ 0 ].reset();
-          dialog.dialog("close");
-        }
+        {
+          text: I18n["warp"]["custom_layer_cancel_button"],
+          click: function () {
+            form[ 0 ].reset();
+            dialog.dialog("close");
+          }
+        }],
+      open: function(){
+        dialogOpen = true;
       },
       close: function () {
+        dialogOpen = false;
         form[ 0 ].reset();
       }
     });
@@ -186,7 +197,11 @@ function init() {
     });
    
  }
-  function addCustomLayer(template) {
+  function addCustomLayer(layer) {
+    var template = layer.template;
+    var title = "";
+    var type = layer.type;
+    var attribution = "";
     var tokens = template.split("/")
     var basetokens = tokens.slice(0, tokens.length - 3)
     var baseurl = basetokens.join("/") + "/";
@@ -195,12 +210,21 @@ function init() {
       return false;
     } 
   
-    var temp_layer = new OpenLayers.Layer.TMS("Custom basemap", baseurl,
+    if (type == "Custom") {
+      title = I18n["warp"]["custom_layer"];
+      attribution = I18n["warp"]["custom_layer"] + " " + baseurl
+    } else {
+      title = type + ": " + layer.title.substring(0,20);
+      attribution = title + " " + baseurl
+    }
+    
+  
+    var temp_layer = new OpenLayers.Layer.TMS(title, baseurl,
             {type: img_type,
               getURL: osm_getTileURL,
               displayOutsideMaxExtent: true,
               transitionEffect: 'resize',
-              attribution: "Custom basemap " + baseurl
+              attribution: attribution
             }
     );
 
@@ -213,12 +237,12 @@ function init() {
   }
   
   var layerButton = new OpenLayers.Control.Button({
-    displayClass: 'layerButton', title: 'Add Custom Basemap', trigger: addCustomLayerAction 
+    displayClass: 'layerButton', title: I18n["warp"]["custom_layer_title"], trigger: addCustomLayerAction 
  });
 
 
-  navig = new OpenLayers.Control.Navigation({title: "Move Around Map"});
-  navigFrom = new OpenLayers.Control.Navigation({title: "Move Around Map"});
+  navig = new OpenLayers.Control.Navigation({title: I18n["warp"]["move_map"]});
+  navigFrom = new OpenLayers.Control.Navigation({title: I18n["warp"]["move_map"]});
 
   to_panel.addControls([layerButton, navig, dragMarker, drawFeatureTo]);
   to_map.addControl(to_panel);
@@ -254,8 +278,132 @@ function init() {
       jQuery("#warped-slider").hide();
     }
   });
+  
+  setupLayerSelect();
+ 
+  var toPosition;
+  var fromPosition;
+  var mapUnderMouse = "";
+  to_map.events.register("mousemove", to_map, function (e) {
+    toPosition = this.events.getMousePosition(e);
+    mapUnderMouse = "to_map";
+  })
+  from_map.events.register("mousemove", from_map, function (e) {
+    fromPosition = this.events.getMousePosition(e);
+    mapUnderMouse = "from_map";
+  })
+
+  //control for keyboard shortcuts for map control    
+  var barControl = new OpenLayers.Control();
+  var barCallbacks = {
+    keydown: function (evt) {
+      if (dialogOpen === true) return true;
+      var key = evt.keyCode;
+      if (key == 81 || key == 65) {
+        // q key - quick add point - any mode control
+        // a key - quick point but with auto placement
+        if (mapUnderMouse == "to_map") {
+          var point = to_map.getLonLatFromPixel(toPosition);
+          var thisVector = new OpenLayers.Geometry.Point(point.lon, point.lat);
+          var pointFeature = new OpenLayers.Feature.Vector(thisVector, null, null);
+          active_to_vectors.addFeatures([pointFeature]);
+          newaddGCPto(pointFeature);
+          if (key == 65) addAutoFromPoint(pointFeature);
+        } else if (mapUnderMouse == "from_map") {
+          var point = from_map.getLonLatFromPixel(fromPosition);
+          var thisVector = new OpenLayers.Geometry.Point(point.lon, point.lat);
+          var pointFeature = new OpenLayers.Feature.Vector(thisVector, null, null);
+          active_from_vectors.addFeatures([pointFeature]);
+          newaddGCPfrom(pointFeature);
+          if (key == 65) addAutoToPoint(pointFeature);
+        }
+
+      } else if (key == 80 || key == 49) {
+        // 1, p = (place point)
+        navig.deactivate();
+        dragMarker.deactivate();
+        drawFeatureFrom.activate();
+      } else if (key == 68 || key == 50) {
+        // 2, d (drag point)
+        navig.deactivate();
+        dragMarker.activate()
+        drawFeatureTo.deactivate();
+      } else if (key == 77 || key == 51) {
+        //3, m (move point)
+        drawFeatureFrom.deactivate();
+        dragMarker.deactivate();
+        navig.activate();
+      }
+    }
+  };
+  var barHandler = new OpenLayers.Handler.Keyboard(barControl, barCallbacks, {});
+  barHandler.activate();
+
+  //control for saving a new gcp by pressing 'ENTER' or 'e' keys
+  var saveControl = new OpenLayers.Control();
+  var saveCallbacks = {
+    keydown: function (evt) {
+      if (dialogOpen === true) return true;
+      if (evt.keyCode == 13 || evt.keyCode == 69) {
+        check_if_gcp_ready();
+        if (temp_gcp_status) {
+          set_gcp();
+        }
+      }
+    }
+  };
+  var saveHandler = new OpenLayers.Handler.Keyboard(saveControl, saveCallbacks, {});
+  saveHandler.activate();
 
 
+}
+
+
+
+//set points for transformation
+function setTransformPoints() {
+  xy = [];
+  XY = [];
+  for (var i = 0; i < from_vectors.features.length; i++) {
+    xy.push([from_vectors.features[i].geometry.x, from_vectors.features[i].geometry.y]);
+    XY.push([to_vectors.features[i].geometry.x, to_vectors.features[i].geometry.y]);
+  }
+  transformation.setControlPoints(xy, XY);
+}
+
+function transform(xy) {
+  var pt = transformation.transform(xy);
+  return pt;
+}
+function reverseTransform(xy) {
+  var pt = transformation.revers(xy);
+  return pt;
+}
+
+function addAutoFromPoint(feature) {
+  setTransformPoints();
+  var from_auto_pt = transformation.revers([feature.geometry.x, feature.geometry.y]);
+  var thisVector = new OpenLayers.Geometry.Point(from_auto_pt[0], from_auto_pt[1]);
+  var pointFeature = new OpenLayers.Feature.Vector(thisVector, null, null);
+ // if (active_from_vectors.features.length === 0) {
+    active_from_vectors.addFeatures([pointFeature]);
+    newaddGCPfrom(pointFeature);
+    var center = new OpenLayers.LonLat(thisVector.x,thisVector.y);
+    from_map.setCenter(center);
+  //}
+}
+
+function addAutoToPoint(feature) {
+  setTransformPoints();
+  var to_auto_pt = transformation.transform([feature.geometry.x, feature.geometry.y]);
+  var thisVector = new OpenLayers.Geometry.Point(to_auto_pt[0], to_auto_pt[1]);
+  var pointFeature = new OpenLayers.Feature.Vector(thisVector, null, null);
+ // if (active_to_vectors.features.length === 0) {
+    active_to_vectors.addFeatures([pointFeature]);
+    newaddGCPto(pointFeature);
+    var center2 = new OpenLayers.LonLat(thisVector.x, thisVector.y);   
+    to_map.setCenter(center2);
+ // }
 }
 
 function joinControls(first, second) {
@@ -376,19 +524,19 @@ function update_gcp_field(gcp_id, elem) {
   var url = gcp_update_field_url + "/" + id;
 
   jQuery('#spinner').show();
-  gcp_notice('Updating...');
+  gcp_notice(I18n["warp"]["gcp_updating"]);
 
   var request = jQuery.ajax({
     type: "PUT",
     url: url,
     data: {authenticity_token: encodeURIComponent(window._token), attribute: attrib, value: value}}
   ).success(function() {
-    gcp_notice("Control Point updated!");
+    gcp_notice(I18n["warp"]["gcp_updated"]);
     move_map_markers(gcp_id, elem);
   }).done(function() {
     jQuery('#spinner').hide();
   }).fail(function() {
-    gcp_notice("Had trouble updating that point with the server. Try again?");
+    gcp_notice(I18n["warp"]["gcp_failed"]);
     elem.value = value;
   });
 }
@@ -417,7 +565,7 @@ function update_gcp(gcp_id, listele) {
 
     }
   }
-  gcp_notice('Updating...');
+  gcp_notice(I18n["warp"]["gcp_updating"]);
   jQuery('#spinner').show();
   
   var request = jQuery.ajax({
@@ -425,11 +573,11 @@ function update_gcp(gcp_id, listele) {
     url: url,
     data: {authenticity_token: encodeURIComponent(window._token), x: x, y: y, lon: lon, lat: lat}}
   ).success(function() {
-    gcp_notice("Control Point updated!");
+    gcp_notice(I18n["warp"]["gcp_updated"]);
   }).done(function() {
     jQuery('#spinner').hide();
   }).fail(function() {
-    gcp_notice("Had trouble updating that point with the server. Try again?");
+    gcp_notice(I18n["warp"]["gcp_failed"]);
     elem.value = value;
   });
 
@@ -538,7 +686,7 @@ function saveDraggedMarker(feature) {
 function save_new_gcp(x, y, lon, lat) {
 
   url = gcp_add_url;
-  gcp_notice("Adding...");
+  gcp_notice(I18n["warp"]["gcp_adding"]);
   jQuery('#spinner').show();
   
   var request = jQuery.ajax({
@@ -549,7 +697,7 @@ function save_new_gcp(x, y, lon, lat) {
     update_row_numbers();
     jQuery('#spinner').hide();
   }).fail(function() {
-    gcp_notice("Had trouble saving that point to the server. Try again?");
+    gcp_notice(I18n["warp"]["gcp_failed"]);
   });
   
 }
@@ -557,7 +705,7 @@ function save_new_gcp(x, y, lon, lat) {
 
 function update_rms(new_rms) {
   fi = document.getElementById('errortitle');
-  fi.value = "Error(" + new_rms + ")";
+  fi.innerHTML=  I18n["warp"]["rms_error_prefix"]+"(" + new_rms + ")";
 }
 
 
@@ -655,7 +803,7 @@ function populate_gcps(gcp_id, img_lon, img_lat, dest_lon, dest_lat, error) {
 function set_gcp() {
   check_if_gcp_ready();
   if (!temp_gcp_status) {
-    alert("You have to add a new control point on each map before pressing this button.");
+    alert(I18n["warp"]["gcp_premature_alert"]);
     return false;
   } else {
     var from_lonlat = from_templl;
@@ -701,38 +849,6 @@ function add_gcp_marker(markers_layer, lonlat, is_active_marker, id_index, gcp_i
   resetHighlighting();
 }
 
-
-
-function addLayerToDest(frm) {
-  num = frm.layer_num.value;
-  new_wms_url = empty_wms_url + '/' + num;
-
-  new_warped_layer = new OpenLayers.Layer.WMS.Untiled("warped map " + num, new_wms_url, {
-    format: 'image/png',
-    status: 'warped'
-  },
-  {
-    TRANSPARENT: 'true',
-    reproject: 'true'
-  },
-  {
-    gutter: 15,
-    buffer: 0
-  },
-  {
-    projection: "epsg:4326",
-    units: "m"
-  });
-  new_warped_layer.setOpacity(0.6);
-  new_warped_layer.setVisibility(true);
-  new_warped_layer.setIsBaseLayer(false);
-  to_map.addLayer(new_warped_layer);
-
-  to_layer_switcher.maximizeControl();
-
-  jQuery('#add_layer').hide();
-
-}
 
 function show_warped_map() {
   warped_layer.setVisibility(true);
@@ -792,26 +908,7 @@ function newaddGCPfrom(feat) {
   check_if_gcp_ready();
 }
 
-function addLayerToDest(frm) {
-  num = frm.layer_num.value;
-  new_wms_url = empty_wms_url + '/' + num;
 
-  new_warped_layer = new OpenLayers.Layer.WMS.Untiled("warped map " + num, new_wms_url,
-          {format: 'image/png', status: 'warped'},
-  {TRANSPARENT: 'true', reproject: 'true'},
-  {gutter: 15, buffer: 0},
-  {projection: "epsg:4326", units: "m"}
-  );
-  new_warped_layer.setOpacity(.6);
-  new_warped_layer.setVisibility(true);
-  new_warped_layer.setIsBaseLayer(false);
-  to_map.addLayer(new_warped_layer);
-
-  to_layer_switcher.maximizeControl();
-
-  jQuery('#add_layer').hide();
-
-}
 
 function resetHighlighting() {
   to_map.div.className = "map-off";
@@ -865,12 +962,12 @@ function bestGuess(guessObj) {
       zoom = to_map.getZoomForExtent(sibBounds.transform(to_map.displayProjection, to_map.projection));
     }
     var places = guessObj["places"];
-    var message = "Map zoomed to best guess: " +
+    var message = I18n["warp"]["best_guess_message"]+ " " +
             "<a href='#' onclick='centerToMap(" + places[0].lon + "," + places[0].lat + "," + zoom + ");return false;'>" + places[0].name + "</a><br />";
     centerToMap(places[0].lon, places[0].lat, zoom);
 
     if (places.length > 1) {
-      message = message + "Other places:<br />";
+      message = message + I18n["warp"]["other_places"]+":<br />";
       for (var i = 1; i < places.length; i++) {
         var place = places[i];
         message = message + "<a href='#' onclick='centerToMap(" + place.lon + "," + place.lat + "," + zoom + ");return false;'>" + place.name + "</a><br />"
@@ -884,4 +981,99 @@ function bestGuess(guessObj) {
 function centerToMap(lon, lat, zoom) {
   var newCenter = new OpenLayers.LonLat(lon, lat).transform(to_map.displayProjection, to_map.projection);
   to_map.setCenter(newCenter, zoom);
+}
+
+var customId = 10000;
+function setupLayerSelect() {
+  jQuery('.layer-select').select2({
+    ajax: {
+      url: "/search.json",
+      dataType: 'json',
+      delay: 250,
+      transport: function (params, success, failure) {
+        if (params.data && params.data.query.indexOf("http") === 0) {
+          var title = params.data.query;
+          customId = customId + 1
+          var id = customId;
+          jQuery('.layer-select').data('select2').dataAdapter.select({"id": id, "type": "Custom", "title": title, "description": "", "href": params.data.query, "thumb": "/uploads/6/thumb/NYC1776-mod.png", "tiles": params.data.query, "year": null})
+          return null;
+        } else {
+          $request = jQuery.ajax(params);
+          $request.then(success);
+          $request.fail(failure);
+
+          return $request;
+        }
+      },
+      data: function (params) {
+        return {
+          query: params.term
+        };
+
+      },
+      processResults: function (data, params) {
+        params.page = params.page || 1;
+
+        return {
+          results: data.data,
+          pagination: {
+            more: (params.page * 50) < data.total_count
+          }
+        };
+
+      },
+      cache: true
+    },
+    escapeMarkup: function (markup) {
+      return markup;
+    },
+    allowClear: true,
+    minimumInputLength: 3,
+    templateResult: formatItems,
+    templateSelection: formatItemSelection
+  });
+
+  function formatItems(item) {
+    if (item.loading)
+      return item.title;
+    
+    var itemType = getItemType(item);
+    var markup = "<div class='select2-result-item clearfix'>" +
+            "<div class='select2-result-item__thumb'><img src='" + item.thumb + "' /></div>" +
+            "<div class='select2-result-item__meta'>" +
+            "<div class='select2-result-item__title'><span class='select2-result-item__type'>" + itemType + ":</span> " + item.title + "</div>";
+
+    if (item.year) {
+      markup += "<div class='select2-result-item__year'>"+ I18n['warp']['custom_layer_year'] +": " + item.year + "</div>";
+    }
+
+    markup += "</div></div>";
+
+    return markup;
+  }
+
+  function formatItemSelection(item) {
+    var itemType = getItemType(item); 
+    if (item.id === "") {
+      return item.text; //placeholder text
+    } else {
+      return itemType + ": " + item.title;
+    }
+  }
+  
+  function getItemType(item){
+    var itemType = "";
+    if (item.type === "Map"){
+      itemType = I18n['warp']['custom_map_type'];
+    } else if (item.type === "Layer") {
+      itemType = I18n['warp']['custom_layer_type'];
+    } else {
+      itemType = I18n['warp']['custom_custom_type']
+    }
+    
+    return itemType;
+  }
+
+
+
 }

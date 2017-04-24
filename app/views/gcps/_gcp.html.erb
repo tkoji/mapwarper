@@ -10,7 +10,7 @@
   else
   errorclass = "blue"
   end -%>
-<tr id="gcp<%= gcp.id %>">
+<tr id="gcp<%= gcp.id %>" class="<%= cycle('gcp-table0', 'gcp-table1') -%>">
   <td id="gcp_id_tr<%=gcp.id%>"><span class="marker_number">&nbsp;</span>
     <input id="gcp_id<%=gcp.id%>" type="hidden" value="<%= gcp.id %>" class="gcp_id" />
   </td>
@@ -24,14 +24,14 @@
     jQuery(document).ready(function() {
       jQuery("a#<%=  "delete_gcp_#{gcp.id}" %>").button().bind("ajax:before", function(event, data, status, xhr) {
         jQuery('#spinner').show();
-        gcp_notice('Deleting...');
+        gcp_notice('<%= t('.deleting') %>');
       }).bind("ajax:error", function(){
-        gcp_notice('Sorry, there seems to be an error with this delete request, try again?');   
+        gcp_notice('<%= t('.error') %>');   
       });
     });
   </script>
 
   <td> 
-    <%= link_to("delete", destroy_gcp_path(:id => gcp.id),  :id => "delete_gcp_#{gcp.id}", :class=>"delete_button", :remote => true,  :method => "delete",  data: { confirm: 'Really delete these points?'})%>
+    <%= link_to(t('.delete_button'), destroy_gcp_path(:id => gcp.id),  :id => "delete_gcp_#{gcp.id}", :class=>"delete_button", :remote => true,  :method => "delete",  data: { confirm: t('.delete_confirm')})%>
   </td>
 </tr>

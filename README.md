@@ -48,6 +48,7 @@ Groups of maps can be made into "mosaics" that will stictch together the composi
   * Roles management (editor, developer, admin etc)
   * Batch Imports
 * Caching of WMS and Tile via Redis
+* i18n support
 
 ## Ruby & Rails
 
@@ -130,6 +131,11 @@ TODO - add production / apache / subdomain benchmarks
 Note that the activerecord postgis adapter is upgraded - as such you may need to change or remove the SRID of any existing maps and layers bbox_geom .
 It should now be 0 where before it may be 4326 This is due to the columns being geometry type as opposed to geographic. SRIDs only really work well for geographic types.
 
+To upgrade geometry columns:
+select UpdateGeometrySRID('public' , 'maps',   'bbox_geom', 0);
+select UpdateGeometrySRID('public' , 'layers', 'bbox_geom', 0);
+select UpdateGeometrySRID('public' , 'maps',   'rough_centroid', 0);
+
 ## Development
 
 Via Vagrant - There is a vagrantfile you can use this uses a provision script in lib/vagrant. Type
@@ -148,6 +154,13 @@ Create a user in the console, as shown above and then exit
     rails s -b 0.0.0.0 -p 3000
 
 to start the server, running on port 3000
+
+##I18n Locales / Translations
+
+You might want to use LocaleApp to assist with translations.
+
+See the [mapwarper](http://www.localeapp.com/projects/public?search=mapwarper) project.
+
 
 ## Deployment instructions
 
