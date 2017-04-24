@@ -16,7 +16,7 @@
       'Please upgrade your browser or use Potlatch 2 to edit the map.';
     document.getElementById('id-container').className = 'unsupported';
   } else {
-    <% locale = "en" %>
+    <% locale = "ja" %>
 
     var id = iD()
       .embed(true)
@@ -38,22 +38,22 @@
     var background_overlay = _.find(id.background().overlayLayerSources(), function(d){
         return d.uuid && d.uuid === "mapwarper";
       });
-      
+
     imagery_overlay.template = "/<%=@overlay.class.table_name%>/tile/<%=@overlay.id%>/{zoom}/{x}/{y}.png";
-    
+
     <% title = @overlay.class == Map ? @overlay.title : @overlay.name %>
     background_overlay.description = '<%= "#{APP_CONFIG['site_name']} #{@overlay.class.to_s} #{@overlay.id.to_s} #{h(title)} "%>';
-    
+
     //iname is used as a hack to correctly give the source in the changeset comment assigned
     background_overlay.iname = '<%= "#{APP_CONFIG['site_name']} #{@overlay.class.to_s} #{@overlay.id.to_s} "%>';
     //twice to turn on and off to get the correct thing for source used in comment using iname
     id.background().toggleOverlayLayer(background_overlay);
     id.background().toggleOverlayLayer(background_overlay);
-    
+
     d3.select('#id-container')
       .call(id.ui());
   }
-  
+
 </script>
 
 </body>
