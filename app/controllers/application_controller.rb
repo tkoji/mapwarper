@@ -5,7 +5,15 @@ class ApplicationController < ActionController::Base
 
   before_filter :configure_permitted_parameters, if: :devise_controller?
 
-    
+  before_action :set_locale
+
+  private
+  # I18n.locale をセットする
+  def set_locale
+    I18n.locale = locale_in_params || locale_in_accept_language || I18n.default_locale
+  end
+
+
   def check_super_user_role
     check_role('super user')
   end
@@ -13,7 +21,7 @@ class ApplicationController < ActionController::Base
   def check_administrator_role
     check_role("administrator")
   end
-  
+
   def check_editor_role
     check_role("editor")
   end
@@ -47,5 +55,3 @@ class ApplicationController < ActionController::Base
 
 
 end
-
-
