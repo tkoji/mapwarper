@@ -1,1 +1,1 @@
-I18n.default_locale = :pt
+I18n.default_locale = :ja
